@@ -1,0 +1,172 @@
+<!DOCTYPE html><html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Universal Trust Bank</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>
+    .modal {
+      transition: all 0.3s ease;
+    }
+    .loader {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #0d47a1;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="bg-blue-50 font-sans">
+  <div class="p-4 max-w-md mx-auto sm:max-w-xl md:max-w-2xl lg:max-w-4xl">
+    <div class="flex items-center justify-between">
+      <div class="text-blue-900 text-2xl font-semibold">ROYAL MANAGEMENT BANK</div>
+      <span class="material-icons text-gray-600">account_circle</span>
+    </div><div class="bg-white shadow-md rounded-lg p-4 mt-4">
+  <p class="text-sm font-semibold text-blue-700">Account Balance</p>
+  <p class="text-4xl font-extrabold text-green-600 mt-1" id="balance">$20,000,000</p>
+</div>
+
+<div class="grid grid-cols-2 gap-3 mt-6">
+  <button onclick="redirectWithDelay('loan')" class="bg-blue-700 text-white py-2 rounded flex items-center justify-center gap-2">
+    <span class="material-icons">account_balance</span> Loan Account
+  </button>
+  <button onclick="redirectWithDelay('investment')" class="bg-indigo-600 text-white py-2 rounded flex items-center justify-center gap-2">
+    <span class="material-icons">trending_up</span> Investment
+  </button>
+  <button onclick="redirectWithDelay('savings')" class="bg-green-700 text-white py-2 rounded flex items-center justify-center gap-2">
+    <span class="material-icons">savings</span> Savings
+  </button>
+  <button onclick="redirectWithDelay('exchange')" class="bg-purple-700 text-white py-2 rounded flex items-center justify-center gap-2">
+    <span class="material-icons">attach_money</span> Exchange
+  </button>
+</div>
+
+<div id="transactions" class="mt-6"></div>
+
+<div class="bg-white rounded-lg shadow-md mt-8 p-4">
+  <h3 class="text-lg font-semibold text-gray-800 mb-2">🌍 Country Exchange Rates</h3>
+  <ul class="text-sm space-y-1 text-gray-700">
+    <li>USD → USD: $1,500</li>
+    <li>EUR → USD: $1,610</li>
+    <li>GBP → USD: $1,850</li>
+    <li>CAD → USD: $1,300</li>
+    <li>CNY → USD: $220</li>
+  </ul>
+</div>
+
+  </div>  <!-- Floating WhatsApp Support -->  <a href="https://wa.me/447385316053?text=Hello%20Support%2C%20I%20need%20assistance%20with%20my%20ROYALMANAGEMENTBank%20account%20exchange%20permit%20 document%20so%20i%20can%20withraw%20to%20my%20 account" target="_blank" class="fixed bottom-20 right-4 bg-green-500 hover:bg-green-600 text-white p-3 rounded-full shadow-lg z-50">
+    <span class="material-icons">support_agent</span>
+  </a>  <!-- Bottom nav -->  <div class="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around py-3 shadow-inner">
+    <button onclick="openModal('transfer')" class="flex flex-col items-center text-blue-600">
+      <span class="material-icons">send</span>
+      <span class="text-xs">Transfer</span>
+    </button>
+    <button onclick="openModal('withdraw')" class="flex flex-col items-center text-green-600">
+      <span class="material-icons">money_off</span>
+      <span class="text-xs">Withdraw</span>
+    </button>
+    <button onclick="openModal('payment')" class="flex flex-col items-center text-purple-600">
+      <span class="material-icons">credit_card</span>
+      <span class="text-xs">Payment</span>
+    </button>
+  </div>  <!-- Modal -->  <div id="modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-end justify-center hidden z-50">
+    <div class="bg-white w-full max-w-md p-4 rounded-t-2xl">
+      <h2 id="modalTitle" class="text-xl font-bold mb-4"></h2>
+      <input id="fullName" type="text" placeholder="Full Name" class="w-full p-3 border rounded mb-2">
+      <input id="bankName" type="text" placeholder="Bank Name" class="w-full p-3 border rounded mb-2">
+      <input id="accountNumber" type="text" placeholder="Account Number" class="w-full p-3 border rounded mb-2">
+      <input id="amount" type="number" placeholder="Amount" class="w-full p-3 border rounded mb-2">
+      <input id="code" type="text" placeholder="Transfer Code" class="w-full p-3 border rounded mb-2">
+      <button onclick="transferNow()" class="bg-blue-600 text-white px-4 py-2 rounded w-full mt-2">Transfer Now</button>
+      <button onclick="closeModal()" class="text-center text-sm text-gray-600 mt-3">Cancel</button>
+    </div>
+  </div>  <!-- Loader -->  <div id="loader" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden z-50">
+    <div class="text-white text-center">
+      <div class="loader mx-auto mb-4"></div>
+      <p id="loaderText">Processing transaction...</p>
+    </div>
+  </div>  <script>
+    const balanceDisplay = document.getElementById('balance');
+    const modal = document.getElementById('modal');
+    const loader = document.getElementById('loader');
+    const loaderText = document.getElementById('loaderText');
+    const modalTitle = document.getElementById('modalTitle');
+    const transactions = document.getElementById('transactions');
+
+    let modalType = 'transfer';
+    let transferCount = 0;
+    let balance = localStorage.getItem('bank_balance');
+
+    if (!balance) {
+      balance = 20000000;
+      localStorage.setItem('bank_balance', balance);
+    }
+    updateBalance();
+
+    function updateBalance() {
+      balance = parseInt(localStorage.getItem('bank_balance'));
+      balanceDisplay.textContent = `$${balance.toLocaleString()}`;
+    }
+
+    function openModal(type) {
+      modalType = type;
+      modalTitle.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Funds`;
+      modal.classList.remove('hidden');
+    }
+
+    function closeModal() {
+      modal.classList.add('hidden');
+    }
+
+    function transferNow() {
+      const fullName = document.getElementById('fullName').value;
+      const bankName = document.getElementById('bankName').value;
+      const accountNumber = document.getElementById('accountNumber').value;
+      const amount = parseInt(document.getElementById('amount').value);
+
+      if (!fullName || !bankName || !accountNumber || !amount || isNaN(amount)) {
+        alert('Fill all fields correctly.');
+        return;
+      }
+
+      closeModal();
+      loader.classList.remove('hidden');
+
+      if (transferCount === 0 && amount === 2000000) {
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          balance -= amount;
+          localStorage.setItem('bank_balance', balance);
+          updateBalance();
+          const message = `✅ Transfer Successful to ${fullName} (${accountNumber}) - $${amount.toLocaleString()}`;
+          transactions.innerHTML = `<div class='bg-green-50 text-green-700 border-l-4 border-green-500 p-3 rounded mb-2'>${message}</div>` + transactions.innerHTML;
+          transferCount++;
+        }, 5000);
+      } else {
+        loaderText.textContent = '⏳ Transaction Pending... Verification Required,meet customer support for exchange permits documents';
+        setTimeout(() => {
+          loader.classList.add('hidden');
+          loaderText.textContent = 'Processing transaction...';
+          const pendingMessage = `⚠️ Transfer to ${fullName} (${accountNumber}) - $${amount.toLocaleString()} is pending. click on customer support icon to get international exchange permits documents to successfully exchange the funds into your native account`;
+          transactions.innerHTML = `<div class='bg-yellow-50 text-yellow-700 border-l-4 border-yellow-400 p-3 rounded mb-2'>${pendingMessage}</div>` + transactions.innerHTML;
+        }, 10000);
+      }
+    }
+
+    function redirectWithDelay(type) {
+      loaderText.textContent = 'Redirecting to ' + type + ' setup...';
+      loader.classList.remove('hidden');
+      setTimeout(() => {
+        loader.classList.add('hidden');
+        alert(`Redirected to ${type.charAt(0).toUpperCase() + type.slice(1)} Account Page.`);
+      }, 4000);
+    }
+  </script></body>
+</html>
