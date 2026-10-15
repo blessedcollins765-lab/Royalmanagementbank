@@ -59,6 +59,247 @@
 
 </head>
 <body class="bg-blue-50 font-sans">
+
+
+<!-- ==========================================
+     OPEN-SOURCE FINANCIAL MARKET TICKER
+     Continuous right-to-left scrolling
+=========================================== -->
+
+<div id="marketTicker">
+  <div class="market-label">MARKET WATCH</div>
+
+  <div class="market-viewport">
+    <div class="market-track">
+
+      <!-- FIRST SET OF MARKET ITEMS -->
+      <div class="market-item">
+        <strong>AAPL</strong>
+        <span class="market-price">$225.50</span>
+        <span class="market-up">▲ 1.25%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>TSLA</strong>
+        <span class="market-price">$340.20</span>
+        <span class="market-down">▼ 0.45%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>NVDA</strong>
+        <span class="market-price">$180.75</span>
+        <span class="market-up">▲ 2.10%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>MSFT</strong>
+        <span class="market-price">$510.40</span>
+        <span class="market-up">▲ 0.85%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>GOOGL</strong>
+        <span class="market-price">$245.30</span>
+        <span class="market-down">▼ 0.60%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>AMZN</strong>
+        <span class="market-price">$225.10</span>
+        <span class="market-up">▲ 1.40%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>BTC</strong>
+        <span class="market-price">$110,500</span>
+        <span class="market-up">▲ 1.80%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>ETH</strong>
+        <span class="market-price">$4,100</span>
+        <span class="market-down">▼ 0.30%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>EUR/USD</strong>
+        <span class="market-price">1.1218</span>
+        <span class="market-up">▲ 0.20%</span>
+      </div>
+
+      <div class="market-item">
+        <strong>GBP/USD</strong>
+        <span class="market-price">1.3200</span>
+        <span class="market-down">▼ 0.10%</span>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<style>
+/* TICKER CONTAINER */
+#marketTicker {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 42px;
+  overflow: hidden;
+  background: #101820;
+  color: #ffffff;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+/* LEFT LABEL */
+#marketTicker .market-label {
+  flex-shrink: 0;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  background: #d4af37;
+  color: #111111;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  z-index: 2;
+}
+
+/* VISIBLE SCROLLING AREA */
+#marketTicker .market-viewport {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* MOVING TRACK */
+#marketTicker .market-track {
+  display: flex;
+  align-items: center;
+  width: max-content;
+  height: 100%;
+  animation: marketTickerMove 35s linear infinite;
+  will-change: transform;
+}
+
+/* INDIVIDUAL ITEMS */
+#marketTicker .market-item {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 8px;
+  height: 100%;
+  padding: 0 20px;
+  border-right: 1px solid #34404b;
+  white-space: nowrap;
+}
+
+#marketTicker .market-item strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+#marketTicker .market-price {
+  color: #e5e7eb;
+}
+
+#marketTicker .market-up {
+  color: #22c55e;
+  font-weight: 600;
+}
+
+#marketTicker .market-down {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+/* RIGHT-TO-LEFT CONTINUOUS ANIMATION */
+@keyframes marketTickerMove {
+  from {
+    transform: translateX(0);
+  }
+
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+/* PAUSE WHEN THE USER HOVERS */
+@media (hover: hover) {
+  #marketTicker:hover .market-track {
+    animation-play-state: paused;
+  }
+}
+
+/* MOBILE ADJUSTMENTS */
+@media (max-width: 600px) {
+  #marketTicker {
+    height: 38px;
+    font-size: 11px;
+  }
+
+  #marketTicker .market-label {
+    padding: 0 9px;
+    font-size: 10px;
+  }
+
+  #marketTicker .market-item {
+    padding: 0 14px;
+    gap: 6px;
+  }
+}
+
+/* RESPECT REDUCED-MOTION PREFERENCES */
+@media (prefers-reduced-motion: reduce) {
+  #marketTicker .market-track {
+    animation: none;
+  }
+}
+</style>
+
+<script>
+(function () {
+  const ticker = document.getElementById("marketTicker");
+
+  if (!ticker || ticker.dataset.initialized === "true") {
+    return;
+  }
+
+  ticker.dataset.initialized = "true";
+
+  const track = ticker.querySelector(".market-track");
+
+  if (!track) return;
+
+  // Save the original market items.
+  const originalItems = Array.from(track.children);
+
+  // Duplicate the items to create a continuous scrolling loop.
+  originalItems.forEach(function (item) {
+    track.appendChild(item.cloneNode(true));
+  });
+
+  // Restart cleanly if the page size changes.
+  window.addEventListener("resize", function () {
+    track.style.animation = "none";
+
+    requestAnimationFrame(function () {
+      track.style.animation = "";
+    });
+  });
+})();
+</script>
+
+
+
+
+
+
+
+
+  
   <div class="p-4 max-w-md mx-auto sm:max-w-xl md:max-w-2xl lg:max-w-4xl">
     <div class="flex items-center justify-between">
       <div class="text-blue-900 text-2xl font-semibold">ROYAL MANAGEMENT BANK</div>
